@@ -16,53 +16,81 @@
 #
 import webapp2
 
-form = '''
-<form method = 'post'>
-	<label>username
-		<input type = 'text' name = 'username'>
-	</label><br>
-	</lable>password
-		<input type = 'password' name='password'>
-	</label><br>
-	<label>verify
-		<input type = 'password' name='verify'>
-	</label><br>
-	<label>email
-		<input type='text' name='email'>
-	</label><br>
+rotc_input = '''
+<form action='/rotc' method='post'>
+	<fieldset>
+		<legend>input</legend>
+		<label>encryption word
+		<input type = 'text' name = 'word'>
+		</label><br>
+		<label>no. of shifts
+		<input type = 'text' name='shifts'>
+		</label><br>
 		<input type='submit' name='submit'>
+	</fieldset>
 </form>'''
+
+loginpage_form = '''
+<form action='/loginpage' method='get'>
+	<fieldset>
+		<legend>login information</legend>
+		<label for='username'>Username</label>
+		<input type='text' id='username' name='username'><br>
+		<label for='password'>Password</label>
+		<input type='password' id='password' name='password'><br>
+		<label for='verifypassword'>Verify Password</label>
+		<input type='password' id='verifypassword' name='verifypassword'><br>
+		Gender:
+		<label for='male'>Male</label>
+		<input type='radio' name='gender' value='male' id='male'><br>
+		<label for='female'>Female</label>
+		<input type='radio' name='gender' value='female' id='female'><br>
+		Email:
+		<input type='text' name='email'>
+	</fieldset>
+<form>
+'''
  
 class MainHandler(webapp2.RequestHandler):
     def get(self):
     	#self.response.headers['Content-Type'] = 'text/HTML'
-        self.response.out.write(form)
+    	self.response.out.write(rotc_input)
 
     def post(self):
-    	#self.response.headers['Content-Type'] = 'text/plain'
 		#self.response.out.write(self.request)
-		user_input = self.request.get('username')
-		'''user_output =''
-		accumulator = ''
-		for i in user_input:
-			i = chr((((ord(i) - 97) + 13) % 26) + 97)
-			accumulator += i
-		user_output = accumulator'''
-		self.response.out.write(user_input)
+		pass
 
 class ROTC(webapp2.RequestHandler): 
-	def get(self):
-		'''q = self.request.get('q')
-		self.response.out.write(q)'''
+	def post(self):
 		self.response.headers['Content-Type'] = 'text/plain'
-		#self.response.out.write(self.request)
-		user_input = self.request.get('user_input')
-		user_output =''
-		accumulator = ''
-		for i in user_input:
-			i = chr((((ord(i) - 97) + 13) % 26) + 97)
-			accumulator += i
-		user_output = accumulator
+		word = self.request.get('word')
+		shift = self.request.get('shifts')
+		if (word == 'samman') and (shift == 'samman'):
+			self.redirect('/loginpage')
+		else:
+			output = rotmaker(word, shift)
+			self.response.out.write(output)
 
-app = webapp2.WSGIApplication([('/', MainHandler), ('/rotc', ROTC)], 
+class LoginPage(webapp2.RequestHandler):
+	def get(self):
+		self.response.out.write(loginpage_form)
+		uname = self.request.get('username')
+		password = self.request.get('password')
+		verifypassword = self.request.get('verifypassword')
+		
+
+
+
+
+app = webapp2.WSGIApplication([('/', MainHandler), ('/rotc', ROTC), ('/loginpage', LoginPage)], 
 							debug=True)
+
+
+def rotmaker(word, shift):
+	accumul = ''
+	shift = int(shift)
+	for i in word:
+		i = chr(((ord(i) - 97 + shift) % 26) + 97)
+		accumul += i
+	return accumul
+
